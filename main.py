@@ -14,9 +14,9 @@ import itertools
 from operator import add
 
 # Options
-min_parties = 5	# Number of minimum parties to pass package
-num_opts 	= (3, 3, 4, 4, 5) # Number of options per subpackage
 data_file 	= 'Hesperia.xlsx' # Excel file with scores/party/option
+num_opts 	= (3, 3, 4, 4, 5) # Number of options per subpackage
+min_parties = 4	# Number of minimum parties to pass package
 export 		= True # Export results into Excel file
 
 # BATNAs
@@ -90,7 +90,7 @@ def main():
 			continue
 		else: # Package passes
 			package_correction = tuple([x+1 for x in package]) # Add one to every option for clarity
-			results[package_correction] = scores
+			results[package_correction] = scores # Add package to results dictionary
 
 	# Export scores into Excel file
 	if export:
@@ -98,4 +98,5 @@ def main():
 
 	return results
 
-main()
+if __name__ == "__main__":
+	main()
