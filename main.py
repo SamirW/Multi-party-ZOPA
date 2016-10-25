@@ -9,35 +9,56 @@ __author__ = 'samirw'
 #################################
 
 import xlrd
+import xlwt
 import itertools
 from operator import add
 
 # Options
-num_parties = 6 # Number of parties in the negotiation
+num_parties = 5 # Number of parties in the negotiation
 min_parties = 5	# Number of minimum parties to pass package
+num_opts 	= (3, 3, 4, 4, 5) # Number of options per subpackage
 data_file 	= 'Hesperia.xlsx' # Excel file with scores/party/option
+export 		= True # Export results into Excel file
 
 # BATNAs
-BATNA_list 	= (10, 10, 10, 10, 10, 10) # Minimum score/party needed to approve package
+BATNA_list 	= (10, 10, 10, 10, 10000) # Minimum score/party needed to approve package
 
-# Number of options per subpackage
-num_opts 	= (3, 3, 4, 4, 5) 
+def export_results(results):
+	# Create workbook and worksheet
+	wb = xlwt.Workbook()
+	ws = wb.add_sheet('ZOPA')
+
+	# Create heading
+	ws.write(0, 0, 'Package')
+	for i in range(1, num_parties+1):
+		ws.write(0, i, 'Player %d Score' % i)
+
+	# Iterate through results, write in worksheet
+	_row = 1
+	for package, score in results.items():
+		ws.write(_row, 0, str(package))
+		for i in range(1, num_parties+1):
+			ws.write(_row, i, score[i-1])
+		_row += 1
+
+	# Save file
+	wb.save('Output.xls')
 
 def main():
+	# Results dictionary
+	results = {}
 
 	# Variable to cap number of failures allowed in ZOPA
 	max_fail 	= num_parties - min_parties 
 
-	# Results dictionary
-	results = {}
-
 	# Import excel file with scores
-	xl_workbook = xlrd.open_workbook(data_file)
-	score_sheet = xl_workbook.sheet_by_name('Master Scores')
+	wb = xlrd.open_workbook(data_file)
+	score_sheet = wb.sheet_by_name('Master Scores')
 
 	# Create score matrix
 	score_matrix = []
 
+	# Import data from Excel sheet
 	for row in range(1, score_sheet.nrows):
 		_row = []
 		for col in range(1, score_sheet.ncols):
@@ -48,7 +69,6 @@ def main():
 	num_opts_lists = []	# Create list of possible subpackage options
 	for num in num_opts:
 		num_opts_lists.append(range(num))
-
 	packages = list(itertools.product(*num_opts_lists))
 
 	# Loop through packages and determine viable packages
@@ -69,11 +89,15 @@ def main():
 			if scores[i] < BATNA_list[i]:
 				fails += 1
 
-		if fails > max_fail:
+		if fails > max_fail: # Package not viable
 			continue
 		else:
 			results[package] = scores
 
+	# Export scores into Excel file
+	if export:
+		export_results(results)
+
 	return results
 
-results = main()
+main()
