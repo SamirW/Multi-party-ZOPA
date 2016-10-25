@@ -14,49 +14,46 @@ import itertools
 from operator import add
 
 # Options
-num_parties = 5 # Number of parties in the negotiation
 min_parties = 5	# Number of minimum parties to pass package
 num_opts 	= (3, 3, 4, 4, 5) # Number of options per subpackage
 data_file 	= 'Hesperia.xlsx' # Excel file with scores/party/option
 export 		= True # Export results into Excel file
 
 # BATNAs
-BATNA_list 	= (10, 10, 10, 10, 10000) # Minimum score/party needed to approve package
-
-def export_results(results):
-	# Create workbook and worksheet
-	wb = xlwt.Workbook()
-	ws = wb.add_sheet('ZOPA')
-
-	# Create heading
-	ws.write(0, 0, 'Package')
-	for i in range(1, num_parties+1):
-		ws.write(0, i, 'Player %d Score' % i)
-
-	# Iterate through results, write in worksheet
-	_row = 1
-	for package, score in results.items():
-		ws.write(_row, 0, str(package))
-		for i in range(1, num_parties+1):
-			ws.write(_row, i, score[i-1])
-		_row += 1
-
-	# Save file
-	wb.save('Output.xls')
+BATNA_list 	= (100, 10, 10, 10, 10000) # Minimum score/party needed to approve package
 
 def main():
-	# Results dictionary
-	results = {}
-
-	# Variable to cap number of failures allowed in ZOPA
-	max_fail 	= num_parties - min_parties 
 
 	# Import excel file with scores
 	wb = xlrd.open_workbook(data_file)
 	score_sheet = wb.sheet_by_name('Master Scores')
 
-	# Create score matrix
-	score_matrix = []
+	# Create necessary variables
+	results 	 = {} # Results dictionary
+	num_parties  = score_sheet.ncols-1 # Number of parties in the negotiation
+	max_fail 	 = num_parties - min_parties # Maximum number of failures allowed in ZOPA
+	score_matrix = [] # Create score matrix
+
+	def export_results(results):
+		# Create workbook and worksheet
+		wb = xlwt.Workbook()
+		ws = wb.add_sheet('ZOPA')
+
+		# Create heading
+		ws.write(0, 0, 'Package')
+		for i in range(1, num_parties+1):
+			ws.write(0, i, 'Player %d Score' % i)
+
+		# Iterate through results, write in worksheet
+		_row = 1
+		for package, score in results.items():
+			ws.write(_row, 0, str(package))
+			for i in range(1, num_parties+1):
+				ws.write(_row, i, score[i-1])
+			_row += 1
+
+		# Save file
+		wb.save('Output.xls')
 
 	# Import data from Excel sheet
 	for row in range(1, score_sheet.nrows):
@@ -91,8 +88,9 @@ def main():
 
 		if fails > max_fail: # Package not viable
 			continue
-		else:
-			results[package] = scores
+		else: # Package passes
+			package_correction = tuple([x+1 for x in package]) # Add one to every option for clarity
+			results[package_correction] = scores
 
 	# Export scores into Excel file
 	if export:
