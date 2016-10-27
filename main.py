@@ -72,7 +72,7 @@ def main():
 	for package in packages:
 
 		# Find scores per party for package
-		scores = [0, 0, 0, 0, 0]
+		scores = [0 for x in BATNA_list]
 		_row = 0
 		for i in range(len(num_opts)):
 			option_row 	 = _row + package[i]
@@ -85,6 +85,10 @@ def main():
 		for i in range(len(scores)):
 			if scores[i] < BATNA_list[i]:
 				fails += 1
+
+		#######################
+		# Custom Options Here #
+		#######################
 
 		if fails > max_fail: # Package not viable
 			continue
