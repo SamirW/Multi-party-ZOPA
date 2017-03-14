@@ -32,17 +32,24 @@ def main():
 		wb = xlwt.Workbook()
 		ws = wb.add_sheet('ZOPA')
 
+		# Number of subpackages
+		len_sub = len(num_opts)
+
 		# Create heading
 		ws.write(0, 0, 'Package')
-		for i in range(1, num_parties+1):
+		for i in range(1, len_sub+1):
+			ws.write(0, i, 'Package option %d' % i)
+		for i in range(len_sub+2, num_parties+len_sub+2):
 			ws.write(0, i, 'Player %d Score' % i)
 
 		# Iterate through results, write in worksheet
 		_row = 1
 		for package, score in results.items():
 			ws.write(_row, 0, str(package))
-			for i in range(1, num_parties+1):
-				ws.write(_row, i, score[i-1])
+			for i in range(1, len_sub+1):
+				ws.write(_row, i, package[i-1])
+			for i in range(len_sub+2, num_parties+len_sub+2):
+				ws.write(_row, i, score[i-(len_sub+2)])
 			_row += 1
 
 		# Save file
