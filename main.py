@@ -4,7 +4,7 @@ __author__ = 'samirw'
 #################################
 #	 Multi-party ZOPA Code   	#
 #	 Given an excel sheet    	#
-#	 with scores per option		#
+#	 with scores per option,	#
 #	 returns possible packages	#
 #################################
 
@@ -13,27 +13,20 @@ import xlwt
 import itertools
 from operator import add
 
-# Options
+#########################
+#	Set Options Here	#
+#########################
 data_file 	= 'Hesperia.xlsx' # Excel file with scores/party/option
 num_opts 	= (3, 3, 4, 4, 5) # Number of options per subpackage
-min_parties = 4	# Number of minimum parties to pass package
+min_parties = 5	# Number of parties needed to pass package
 export 		= True # Export results into Excel file
 
 # BATNAs
-BATNA_list 	= (100, 10, 10, 10, 10000) # Minimum score/party needed to approve package
+BATNA_list 	= (10, 10, 10, 10, 30) # Minimum score/party needed to approve package
 
 def main():
 
-	# Import excel file with scores
-	wb = xlrd.open_workbook(data_file)
-	score_sheet = wb.sheet_by_name('Master Scores')
-
-	# Create necessary variables
-	results 	 = {} # Results dictionary
-	num_parties  = score_sheet.ncols-1 # Number of parties in the negotiation
-	max_fail 	 = num_parties - min_parties # Maximum number of failures allowed in ZOPA
-	score_matrix = [] # Create score matrix
-
+	# Function to export results to Output File
 	def export_results(results):
 		# Create workbook and worksheet
 		wb = xlwt.Workbook()
@@ -54,6 +47,16 @@ def main():
 
 		# Save file
 		wb.save('Output.xls')
+
+	# Import excel file with scores
+	wb = xlrd.open_workbook(data_file)
+	score_sheet = wb.sheet_by_name('Master Scores')
+
+	# Create necessary variables
+	results 	 = {} # Results dictionary
+	num_parties  = score_sheet.ncols-1 # Number of parties in the negotiation
+	max_fail 	 = num_parties - min_parties # Maximum number of failures allowed in ZOPA
+	score_matrix = [] # Create score matrix
 
 	# Import data from Excel sheet
 	for row in range(1, score_sheet.nrows):
@@ -87,7 +90,11 @@ def main():
 				fails += 1
 
 		#######################
+		# 					  #
+		#					  #
 		# Custom Options Here #
+		#					  #
+		#					  #
 		#######################
 
 		if fails > max_fail: # Package not viable
